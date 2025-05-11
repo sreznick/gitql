@@ -1,5 +1,6 @@
 #include "config.hpp"
-
+#include <stdexcept>
+#include <cstring> 
 Config::Config(int argc, char* argv[]) {
     for (std::size_t i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "-query") == 0) {
