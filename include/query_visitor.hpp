@@ -1,6 +1,7 @@
 #pragma once
 #include "TParserBaseVisitor.h"
 #include "TParser.h"
+#include "TParserVisitor.h"
 #include "query.hpp"
 #include <vector>
 
@@ -9,16 +10,18 @@
 
 class QueryVisitor : public gitql::TParserBaseVisitor {
 public:
-    std::any visitCondition(gitql::TParser::ConditionContext* ctx) override;
+    std::any visitEqual(gitql::TParser::EqualContext* ctx) override;
+    std::any visitContains(gitql::TParser::ContainsContext* ctx) override;
     std::any visitFields(gitql::TParser::FieldsContext* ctx) override;
-    std::any visitPortion_clause(gitql::TParser::Portion_clauseContext* ctx) override;
+    std::any visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) override;
+    std::any visitOffsetFirst(gitql::TParser::OffsetFirstContext* ctx) override;
     const std::vector<WhereClause>& Where() const;
-    const std::vector<std::string>& Select() const;
+    uint64_t Select() const;
     std::size_t Limit() const;
     std::size_t Offset() const;
 private:
     std::vector<WhereClause> where_;
-    std::vector<std::string> select_;
+    uint64_t select_ = 0;
     std::size_t limit_;
     std::size_t offset_;
 };

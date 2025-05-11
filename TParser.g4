@@ -7,5 +7,10 @@ options {
 main: SELECT fields FROM FIELD where_clause? portion_clause? EOF;
 fields: ALL | FIELD (COMMA FIELD)*;
 where_clause: WHERE condition (AND condition)*;
-condition: FIELD EQUAL QUOTE;
-portion_clause: LIMIT NUM (OFFSET NUM)? | OFFSET NUM (LIMIT NUM)?;
+condition: equal | contains;
+equal: FIELD EQUAL QUOTE;
+contains: QUOTE IN FIELD;
+portion_clause
+	: LIMIT NUM (OFFSET NUM)? #limitFirst
+	| OFFSET NUM (LIMIT NUM)? #offsetFirst
+	;

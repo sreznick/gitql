@@ -3,23 +3,44 @@
 #include <vector>
 #include <string>
 #include "TParser.h"
+#include <ctime>
+#define SELECT_HASH_MASK (1ull << 0)
+#define SELECT_AUTHOR_NAME_MASK (1ull << 1)
+#define SELECT_AUTHOR_EMAIL_MASK (1ull << 2)
+#define SELECT_MESSAGE_MASK (1ull << 3)
+#define SELECT_FILES_MASK (1ull << 4)
+#define SELECT_DATE_MASK (1ull << 5)    
+
+enum WhereClauseType {
+    WHERE_CLAUSE_TYPE_EQUAL,
+    WHERE_CLAUSE_TYPE_CONTAINS,
+    WHERE_CLAUSE_TYPE_DAY,
+    WHERE_CLAUSE_TYPE_MONTH,
+    WHERE_CLAUSE_TYPE_YEAR
+};
 
 struct WhereClause {
+    enum WhereClauseType Type;
+    std::tm Time;
     std::string Key;
     std::string Value;
+};
+
+enum From {
+    COMMITS
 };
 
 class Query {
 public:
     Query(gitql::TParser::MainContext *ctx);
-    const std::vector<std::string>& Select() const;
-    const std::string& From() const;
+    uint64_t Select() const;
+    enum From From() const;
     const std::vector<WhereClause>& Where() const;
     std::size_t Limit() const;
     std::size_t Offset() const;
 private:
-    std::vector<std::string> select_;
-    std::string from_;
+    uint64_t select_ = 0;
+    enum From from_;
     std::vector<WhereClause> where_;
     std::size_t offset_;
     std::size_t limit_;

@@ -8,7 +8,7 @@ Query::Query(gitql::TParser::MainContext *ctx) {
         limit_ = visitor.Limit();
         offset_ = visitor.Offset();
     }
-    from_ = ctx->FROM()->getText();
+    from_ = COMMITS;
     if (ctx->where_clause()) {
         ctx->where_clause()->accept(&visitor);
     }
@@ -17,11 +17,11 @@ Query::Query(gitql::TParser::MainContext *ctx) {
     select_ = visitor.Select();
 }
 
-const std::vector<std::string>& Query::Select() const {
+uint64_t Query::Select() const {
     return select_;
 }
 
-const std::string& Query::From() const {
+enum From Query::From() const {
     return from_;
 }
 
