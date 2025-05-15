@@ -2,10 +2,6 @@
 
 #include <cstdint>
 namespace constants {
-inline constexpr const char *ApiHost = "api.github.com";
-inline constexpr const char *HelperUrl =
-    "/repos/MAXXXIMUS-tropical-milkshake/drop-archiving/commits?sha=feature/"
-    "archiving";
 inline constexpr const int HashSize = 40;
 inline constexpr const int32_t Hash = 1 << 0;
 inline constexpr const int32_t AuthorName = 1 << 1;

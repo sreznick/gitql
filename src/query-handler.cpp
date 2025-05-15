@@ -1,5 +1,6 @@
 #include "query-handler.h"
 #include "absl/container/btree_map.h"
+#include "commit-info.h"
 #include "constants.h"
 #include "git2.h"
 #include "query.hpp"
@@ -8,7 +9,8 @@
 #include <unordered_set>
 #include <vector>
 
-QueryHandler::QueryHandler(git_repository *repo)
+QueryHandler::QueryHandler(git_repository *repo,
+                           std::vector<std::unique_ptr<CommitInfo>> &commits)
     : db_(constants::DBPath, Xapian::DB_CREATE_OR_OPEN), termgen_(), qp_(),
       repo_(repo) {
   termgen_.set_database(db_);
@@ -16,6 +18,12 @@ QueryHandler::QueryHandler(git_repository *repo)
   termgen_.set_max_word_length(constants::MaxWordLen);
   qp_.set_database(db_);
   qp_.set_stemming_strategy(Xapian::QueryParser::STEM_NONE);
+  for (const auto &commit : commits) {
+    auto *ci = commit.get();
+    btree_author_name_[ci->author_name].push_back(ci);
+    btree_author_email_[ci->author_email].push_back(ci);
+    btree_date_.insert({ci->date, ci});
+  }
 }
 
 std::vector<std::vector<std::string>>
@@ -39,7 +47,7 @@ QueryHandler::Execute(const Query &query) {
         fields.push_back((*it)->message);
       }
       if (query.Select() & constants::Date) {
-        fields.push_back((*it)->date);
+        fields.push_back(std::to_string((*it)->date.count()));
       }
       res.push_back(fields);
     }
@@ -54,9 +62,11 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     auto low = btree.lower_bound(value);
     auto high = btree.upper_bound(value);
     for (auto it = low; it != high; ++it) {
-      auto *commit = it->second.get();
-      if (first_commit || s.contains(commit)) {
-        sn.insert(commit);
+      auto commits = it->second;
+      for (const auto &commit : commits) {
+        if (first_commit || s.contains(commit)) {
+          sn.insert(commit);
+        }
       }
     }
   };
@@ -66,16 +76,15 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     // auto time = query.Where()[i].Time.tm_sec;
     if (key == "author_name") {
       Apply(btree_author_name_, value);
-    } else if (key == "author_name") {
+    } else if (key == "author_email") {
       Apply(btree_author_email_, value);
-    // } else if (key == "date") {
-    //   Apply(btree_date_, value);
+      // } else if (key == "date") {
+      //   Apply(btree_date_, value);
     }
     s.swap(sn);
     first_commit = false;
   }
-  commits_.resize(s.size());
-  std::copy(s.begin(), s.end(), std::back_inserter(commits_));
+  commits_.assign(s.begin(), s.end());
 }
 
 void QueryHandler::filterCommitsByTextSearch(const Query &query) {
@@ -122,6 +131,5 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     }
     s.swap(sn);
   }
-  file_names_.resize(s.size());
-  std::copy(s.begin(), s.end(), std::back_inserter(file_names_));
+  file_names_.assign(s.begin(), s.end());
 }

@@ -83,7 +83,7 @@ GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
       return std::nullopt;
     }
     commits.emplace_back(std::make_unique<CommitInfo>(
-        hash, author, message, std::to_string(time), *files));
+        hash, author, message, time, *files));
     git_commit_free(commit);
   }
   git_revwalk_free(walker);

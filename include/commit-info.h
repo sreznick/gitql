@@ -14,7 +14,7 @@
 
 struct CommitInfo {
   CommitInfo(const char *hash, const git_signature *author, const char *message,
-             const std::string &date, const std::vector<std::string> &files);
+             size_t date, const std::vector<std::string> &files);
   //std::array<char, constants::HashSize> hash;
   std::string hash;
   std::string author_name;
@@ -22,7 +22,8 @@ struct CommitInfo {
   std::string message;
   //std::vector<std::array<char, constants::HashSize + 1>> files;
   std::vector<std::string> files;
-  std::string date;
+  //std::string date;
+  std::chrono::seconds date;
 };
 
 // struct Repo {
