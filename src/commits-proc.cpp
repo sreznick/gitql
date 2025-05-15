@@ -1,6 +1,6 @@
 #include "commits-proc.h"
-#include "constants.h"
 #include "commit-info.h"
+#include "constants.h"
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
@@ -37,6 +37,10 @@ std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
   git_diff_foreach(
       diff,
       [](const git_diff_delta *delta, float, void *payload) {
+        if (delta->new_file.mode != GIT_FILEMODE_BLOB ||
+            delta->new_file.mode != GIT_FILEMODE_BLOB_EXECUTABLE) {
+          return 0;
+        }
         auto *files = (std::vector<std::string> *)payload;
         char buf[constants::HashSize + 1];
         git_oid_tostr(buf, sizeof(buf), &delta->new_file.id);
@@ -82,8 +86,8 @@ GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
       git_revwalk_free(walker);
       return std::nullopt;
     }
-    commits.emplace_back(std::make_unique<CommitInfo>(
-        hash, author, message, time, *files));
+    commits.emplace_back(
+        std::make_unique<CommitInfo>(hash, author, message, time, *files));
     git_commit_free(commit);
   }
   git_revwalk_free(walker);
