@@ -37,7 +37,7 @@ std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
   git_diff_foreach(
       diff,
       [](const git_diff_delta *delta, float, void *payload) {
-        if (delta->new_file.mode != GIT_FILEMODE_BLOB ||
+        if (delta->new_file.mode != GIT_FILEMODE_BLOB &&
             delta->new_file.mode != GIT_FILEMODE_BLOB_EXECUTABLE) {
           return 0;
         }

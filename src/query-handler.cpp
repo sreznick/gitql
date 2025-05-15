@@ -20,6 +20,10 @@ QueryHandler::QueryHandler(git_repository *repo,
   qp_.set_stemming_strategy(Xapian::QueryParser::STEM_NONE);
   for (const auto &commit : commits) {
     auto *ci = commit.get();
+    for (auto &file : ci->files) {
+      file_to_commits_[file].push_back(ci);
+    }
+    commits_.push_back(ci);
     btree_author_name_[ci->author_name].push_back(ci);
     btree_author_email_[ci->author_email].push_back(ci);
     btree_date_.insert({ci->date, ci});
@@ -31,7 +35,9 @@ QueryHandler::Execute(const Query &query) {
   std::vector<std::vector<std::string>> res;
   if (query.From() == COMMITS) {
     filterCommitsByBTree(query);
+    std::cout << commits_.size() << std::endl;
     filterCommitsByTextSearch(query);
+    std::cout << commits_.size() << std::endl;
     for (auto it = commits_.begin(); it != commits_.end(); ++it) {
       std::vector<std::string> fields;
       if (query.Select() & constants::Hash) {
@@ -48,6 +54,9 @@ QueryHandler::Execute(const Query &query) {
       }
       if (query.Select() & constants::Date) {
         fields.push_back(std::to_string((*it)->date.count()));
+      }
+      if (query.Select() & constants::Files) {
+        fields.insert(fields.end(), (*it)->files.begin(), (*it)->files.end());
       }
       res.push_back(fields);
     }
@@ -73,18 +82,21 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
   for (auto &clause : query.Where()) {
     sn.clear();
     auto key = clause.Key, value = clause.Value;
-    // auto time = query.Where()[i].Time.tm_sec;
     if (key == "author_name") {
       Apply(btree_author_name_, value);
     } else if (key == "author_email") {
       Apply(btree_author_email_, value);
       // } else if (key == "date") {
       //   Apply(btree_date_, value);
+    } else {
+      continue;
     }
     s.swap(sn);
     first_commit = false;
   }
-  commits_.assign(s.begin(), s.end());
+  if (!first_commit) {
+    commits_.assign(s.begin(), s.end());
+  }
 }
 
 void QueryHandler::filterCommitsByTextSearch(const Query &query) {
@@ -112,7 +124,7 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
   }
   db_.commit_transaction();
   std::unordered_set<std::string> s, sn;
-  bool first_clause = false;
+  bool first_clause = true;
   for (const auto &clause : query.Where()) {
     sn.clear();
     if (clause.Type != WHERE_CLAUSE_TYPE_CONTAINS) {
@@ -122,6 +134,7 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     Xapian::Query q =
         qp_.parse_query(clause.Value, Xapian::QueryParser::FLAG_PHRASE);
     Xapian::Enquire enq(db_);
+    enq.set_query(q);
     Xapian::MSet mset = enq.get_mset(0, db_.get_doccount());
     std::unordered_set<std::string> files;
     for (auto it = mset.begin(); it != mset.end(); ++it) {
@@ -130,6 +143,15 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
       }
     }
     s.swap(sn);
+    first_clause = false;
   }
   file_names_.assign(s.begin(), s.end());
+  commits_.clear();
+  // mb change std::vector<std::string> files to std::unordered_set
+  std::unordered_set<CommitInfo *> commits_set;
+  for (const auto &file : file_names_) {
+    auto commits = file_to_commits_[file];
+    commits_set.insert(commits.begin(), commits.end());
+  }
+  commits_.assign(commits_set.begin(), commits_set.end());
 }

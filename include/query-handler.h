@@ -4,6 +4,7 @@
 #include "commit-info.h"
 #include "query.hpp"
 #include "xapian.h"
+#include <absl/container/flat_hash_map.h>
 #include <chrono>
 #include <git2/types.h>
 #include <memory>
@@ -28,6 +29,7 @@ private:
   absl::btree_map<std::string, std::vector<CommitInfo *>> btree_author_email_;
   absl::btree_map<std::chrono::seconds, CommitInfo *> btree_date_;
 
+  absl::flat_hash_map<std::string, std::vector<CommitInfo *>> file_to_commits_;
   Xapian::TermGenerator termgen_;
   Xapian::QueryParser qp_;
 
