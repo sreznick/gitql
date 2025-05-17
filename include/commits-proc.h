@@ -13,3 +13,5 @@ GetAllCommitsInfo(git_repository *, const std::string &);
 
 std::optional<std::vector<std::string>>
 GetCommitFiles(git_commit *, git_repository *);
+
+git_commit *GetCommitFromHash(std::string &hash, git_repository *repo);

@@ -1,6 +1,7 @@
 #include "query-handler.h"
 #include "absl/container/btree_map.h"
 #include "commit-info.h"
+#include "commits-proc.h"
 #include "constants.h"
 #include "git2.h"
 #include "query.hpp"
@@ -98,11 +99,27 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     commits_.assign(s.begin(), s.end());
   }
 }
+bool QueryHandler::hasContainsClause(const Query &query) {
+  for (const auto &clause : query.Where()) {
+    if (clause.Type == WHERE_CLAUSE_TYPE_CONTAINS) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void QueryHandler::filterCommitsByTextSearch(const Query &query) {
+  if (!hasContainsClause(query)) {
+    return;
+  }
   db_.begin_transaction();
   for (const auto &commit : commits_) {
+    git_commit *c = GetCommitFromHash(commit->hash, repo_);
+    auto files = *GetCommitFiles(c, repo_);
+    // todo: handle error
+    commit->files = files;
     for (const auto &file : commit->files) {
+      file_to_commits_[file].push_back(commit);
       git_oid oid;
       if (git_oid_fromstr(&oid, file.data()) != 0) {
         throw std::runtime_error("Error: git_oid_fromstr");
@@ -130,7 +147,7 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     if (clause.Type != WHERE_CLAUSE_TYPE_CONTAINS) {
       continue;
     }
-    // add to enum difference between contains in file or in message ?
+    // todo: add to enum difference between contains in file or in message ?
     Xapian::Query q =
         qp_.parse_query(clause.Value, Xapian::QueryParser::FLAG_PHRASE);
     Xapian::Enquire enq(db_);

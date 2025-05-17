@@ -19,7 +19,7 @@ public:
 private:
   void filterCommitsByBTree(const Query &query);
   void filterCommitsByTextSearch(const Query &query);
-
+  bool hasContainsClause(const Query &query);
   Xapian::WritableDatabase db_;
 
   std::vector<CommitInfo *> commits_;

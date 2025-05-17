@@ -13,6 +13,7 @@
 #include <iostream>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
@@ -80,16 +81,28 @@ GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
     auto author = git_commit_author(commit);
     auto message = git_commit_message(commit);
     auto time = git_commit_time(commit);
-    auto files = GetCommitFiles(commit, repo);
-    if (!files) {
-      git_commit_free(commit);
-      git_revwalk_free(walker);
-      return std::nullopt;
-    }
+    // auto files = GetCommitFiles(commit, repo);
+    // if (!files) {
+    //   git_commit_free(commit);
+    //   git_revwalk_free(walker);
+    //   return std::nullopt;
+    // }
     commits.emplace_back(
-        std::make_unique<CommitInfo>(hash, author, message, time, *files));
+        std::make_unique<CommitInfo>(hash, author, message, time, std::vector<std::string>()));
     git_commit_free(commit);
   }
   git_revwalk_free(walker);
   return commits;
+}
+
+git_commit *GetCommitFromHash(std::string &hash, git_repository *repo) {
+  git_oid oid;
+  if (git_oid_fromstr(&oid, hash.c_str()) != 0) {
+    throw std::runtime_error("Error: git_oid_fromstr");
+  }
+  git_commit *commit;
+  if (git_commit_lookup(&commit, repo, &oid) != 0) {
+    throw std::runtime_error("Error: git_commit_lookup");
+  }
+  return commit;
 }
