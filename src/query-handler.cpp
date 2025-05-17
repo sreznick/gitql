@@ -99,6 +99,7 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     commits_.assign(s.begin(), s.end());
   }
 }
+
 bool QueryHandler::hasContainsClause(const Query &query) {
   for (const auto &clause : query.Where()) {
     if (clause.Type == WHERE_CLAUSE_TYPE_CONTAINS) {
@@ -115,18 +116,19 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
   db_.begin_transaction();
   for (const auto &commit : commits_) {
     git_commit *c = GetCommitFromHash(commit->hash, repo_);
-    auto files = *GetCommitFiles(c, repo_);
+    auto files = GetCommitFiles(c, repo_);
+    git_commit_free(c);
     // todo: handle error
     commit->files = files;
     for (const auto &file : commit->files) {
       file_to_commits_[file].push_back(commit);
       git_oid oid;
       if (git_oid_fromstr(&oid, file.data()) != 0) {
-        throw std::runtime_error("Error: git_oid_fromstr");
+        throw std::runtime_error("filterCommitsByTextSearch: git_oid_fromstr");
       }
       git_blob *blob;
       if (git_blob_lookup(&blob, repo_, &oid) != 0) {
-        throw std::runtime_error("Error: git_blob_lookup");
+        throw std::runtime_error("filterCommitsByTextSearch: git_blob_lookup");
       }
       const void *content = git_blob_rawcontent(blob);
       size_t size = git_blob_rawsize(blob);
@@ -164,7 +166,6 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
   }
   file_names_.assign(s.begin(), s.end());
   commits_.clear();
-  // mb change std::vector<std::string> files to std::unordered_set
   std::unordered_set<CommitInfo *> commits_set;
   for (const auto &file : file_names_) {
     auto commits = file_to_commits_[file];

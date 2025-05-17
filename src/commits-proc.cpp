@@ -16,14 +16,14 @@
 #include <stdexcept>
 #include <string>
 
-std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
+std::vector<std::string> GetCommitFiles(git_commit *commit,
                                                        git_repository *repo) {
   git_commit *parent = nullptr;
   git_commit_parent(&parent, commit, 0);
   git_tree *commit_tree, *parent_tree = nullptr;
   if (git_commit_tree(&commit_tree, commit) != 0) {
     git_commit_free(parent);
-    return std::nullopt;
+    throw std::runtime_error("GetCommitFiles: git_commit_parent");
   }
   git_commit_tree(&parent_tree, parent);
   git_diff *diff;
@@ -32,7 +32,7 @@ std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
     git_tree_free(commit_tree);
     git_commit_free(parent);
     git_tree_free(parent_tree);
-    return std::nullopt;
+    throw std::runtime_error("GetCommitFiles: git_diff_tree_to_tree");
   }
   std::vector<std::string> files;
   git_diff_foreach(
@@ -56,16 +56,16 @@ std::optional<std::vector<std::string>> GetCommitFiles(git_commit *commit,
   return files;
 }
 
-std::optional<std::vector<std::unique_ptr<CommitInfo>>>
+std::vector<std::unique_ptr<CommitInfo>>
 GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
   git_revwalk *walker;
   if (git_revwalk_new(&walker, repo) != 0) {
-    return std::nullopt;
+    throw std::runtime_error ("GetAllCommitsInfo: git_revwalk_new");
   }
   auto refname = "refs/heads/" + branch;
   if (git_revwalk_push_ref(walker, refname.c_str()) != 0) {
     git_revwalk_free(walker);
-    return std::nullopt;
+    throw std::runtime_error("GetAllCommitsInfo: git_revwalk_push_ref");
   }
   git_oid oid;
 
@@ -74,7 +74,7 @@ GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
     git_commit *commit;
     if (git_commit_lookup(&commit, repo, &oid) != 0) {
       git_revwalk_free(walker);
-      return std::nullopt;
+      throw std::runtime_error ("GetAllCommitsInfo: git_commit_lookup");
     }
     char hash[constants::HashSize + 1];
     git_oid_tostr(hash, sizeof(hash), &oid);
