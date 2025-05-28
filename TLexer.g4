@@ -1,6 +1,7 @@
 lexer grammar TLexer;
 
 SELECT: 'SELECT' | 'select';
+RANGE: 'RANGE' | 'range';
 IN: 'IN' | 'in';
 FROM: 'FROM' | 'from';
 LIMIT: 'LIMIT' | 'limit';

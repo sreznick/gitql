@@ -19,7 +19,11 @@ void PrintQuery(const Query& query) {
     std::cout << "Select: " << std::bitset<64>(query.Select()) << std::endl;
     for (std::size_t i = 0; i < query.Where().size(); i++) {
         std::cout << "Where (mask): " << query.Where()[i].Type << std::endl;
-        std::cout << "Where (time): " << std::put_time(&query.Where()[i].Time, "%Y-%m-%d %H:%M:%S") << std::endl;
+        std::cout << "Where (from time): " << std::put_time(&query.Where()[i].FromTime, "%Y-%m-%d %H:%M:%S") << std::endl;
+        std::cout << "Where (to time): " << std::put_time(&query.Where()[i].ToTime, "%Y-%m-%d %H:%M:%S") << std::endl;
+        std::cout << "Where (from time seconds): " << query.Where()[i].FromTimeSeconds() << std::endl;
+        std::cout << "Where (to time seconds): " << query.Where()[i].ToTimeSeconds() << std::endl;
+        std::cout << "Where (to time): " << std::put_time(&query.Where()[i].ToTime, "%Y-%m-%d %H:%M:%S") << std::endl;
         std::cout << "Where (key): " << query.Where()[i].Key << std::endl;
         std::cout << "Where (value): " << query.Where()[i].Value << std::endl;
     }

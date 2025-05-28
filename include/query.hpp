@@ -16,14 +16,22 @@ enum WhereClauseType {
     WHERE_CLAUSE_TYPE_CONTAINS,
     WHERE_CLAUSE_TYPE_DAY,
     WHERE_CLAUSE_TYPE_MONTH,
-    WHERE_CLAUSE_TYPE_YEAR
+    WHERE_CLAUSE_TYPE_YEAR,
+    WHERE_CLAUSE_TYPE_RANGE
 };
 
 struct WhereClause {
     enum WhereClauseType Type;
-    std::tm Time;
+    mutable std::tm FromTime;
+    mutable std::tm ToTime;
     std::string Key;
     std::string Value;
+    uint64_t FromTimeSeconds() const {
+        return timegm(&FromTime);
+    };
+    uint64_t ToTimeSeconds() const {
+        return timegm(&ToTime);
+    };
 };
 
 enum From {
