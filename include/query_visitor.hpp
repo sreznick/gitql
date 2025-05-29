@@ -11,6 +11,7 @@
 class QueryVisitor : public gitql::TParserBaseVisitor {
 public:
     std::any visitEqual(gitql::TParser::EqualContext* ctx) override;
+    std::any visitRange(gitql::TParser::RangeContext* ctx) override;
     std::any visitContains(gitql::TParser::ContainsContext* ctx) override;
     std::any visitFields(gitql::TParser::FieldsContext* ctx) override;
     std::any visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) override;
