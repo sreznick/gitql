@@ -73,11 +73,11 @@ void PrintTable(const std::vector<std::vector<std::string>> &table) {
 }
 
 int main(int argc, char *argv[]) {
-  
+
   try {
     Config config(argc, argv);
     if (config.Help()) {
-      PrintHelp();
+      // PrintHelp();
       return EXIT_SUCCESS;
     }
     antlr4::ANTLRInputStream input(config.Query());
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     antlr4::CommonTokenStream tokens(&lexer);
     gitql::TParser parser(&tokens);
     Query query(parser.main());
-    PrintQuery(query);
+    // PrintQuery(query);
     git_libgit2_init();
     git_repository *repo = nullptr;
     if (git_repository_open(&repo, "/home/sh4rrkyyyy/os/xxxx") != 0) {
@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
 
     QueryHandler qh(repo, vec);
     auto res = qh.Execute(query);
+    if (res.size() > 0 && res.size() > query.Limit()) {
+      res.resize(query.Limit());
+    }
     PrintTable(res);
 
     git_repository_free(repo);

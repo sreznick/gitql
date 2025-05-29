@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "git2.h"
 #include "query.hpp"
+#include <chrono>
 #include <iterator>
 #include <stdexcept>
 #include <unordered_set>
@@ -86,6 +87,9 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     } else if (key == "author_email") {
       Apply(btree_author_email_, value, value);
     } else if (key == "date") {
+      Apply(btree_date_, std::chrono::seconds(clause.FromTimeSeconds()),
+            std::chrono::seconds(clause.ToTimeSeconds()));
+    } else if (key == "day" || key == "month" || key == "year") {
       Apply(btree_date_, std::chrono::seconds(clause.FromTimeSeconds()),
             std::chrono::seconds(clause.ToTimeSeconds()));
     } else {
