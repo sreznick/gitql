@@ -89,7 +89,9 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     } else if (key == "date") {
       Apply(btree_date_, std::chrono::seconds(clause.FromTimeSeconds()),
             std::chrono::seconds(clause.ToTimeSeconds()));
-    } else if (key == "day" || key == "month" || key == "year") {
+    } else if (clause.Type == WHERE_CLAUSE_TYPE_DAY ||
+               clause.Type == WHERE_CLAUSE_TYPE_MONTH ||
+               clause.Type == WHERE_CLAUSE_TYPE_YEAR) {
       Apply(btree_date_, std::chrono::seconds(clause.FromTimeSeconds()),
             std::chrono::seconds(clause.ToTimeSeconds()));
     } else {
