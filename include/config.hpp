@@ -9,5 +9,5 @@ public:
     bool Help() const;
 private:
     std::string query_;
-    bool help_ = true;
+    bool help_ = false;
 };
