@@ -59,6 +59,8 @@ std::any QueryVisitor::visitEqual(gitql::TParser::EqualContext* ctx) {
         }
         where.FromTime = time;
         where.ToTime = time;
+        where.ToTime.tm_mday += 1;
+        std::mktime(&where.ToTime);
     } else if (key == "month") {
         where.Type = WHERE_CLAUSE_TYPE_MONTH;
         std::tm time{};
@@ -69,6 +71,8 @@ std::any QueryVisitor::visitEqual(gitql::TParser::EqualContext* ctx) {
         }
         where.FromTime = time;
         where.ToTime = time;
+        where.ToTime.tm_mon += 1;
+        std::mktime(&where.ToTime);
     } else if (key == "year") {
         where.Type = WHERE_CLAUSE_TYPE_YEAR;
         std::tm time{};
@@ -79,6 +83,8 @@ std::any QueryVisitor::visitEqual(gitql::TParser::EqualContext* ctx) {
         }
         where.FromTime = time;
         where.ToTime = time;
+        where.ToTime.tm_year += 1;
+        std::mktime(&where.ToTime);
     } else {
         where.Type = WHERE_CLAUSE_TYPE_EQUAL;
         where.Key = key;
