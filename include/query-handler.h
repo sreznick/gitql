@@ -27,7 +27,7 @@ private:
 
   absl::btree_map<std::string, std::vector<CommitInfo *>> btree_author_name_;
   absl::btree_map<std::string, std::vector<CommitInfo *>> btree_author_email_;
-  absl::btree_map<std::chrono::seconds, CommitInfo *> btree_date_;
+  absl::btree_map<std::chrono::seconds, std::vector<CommitInfo *>> btree_date_;
 
   absl::flat_hash_map<std::string, std::vector<CommitInfo *>> file_to_commits_;
   Xapian::TermGenerator termgen_;

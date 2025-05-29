@@ -5,6 +5,7 @@
 #include "git2.h"
 #include "query-handler.h"
 #include "query.hpp"
+#include <algorithm>
 #include <antlr4-runtime.h>
 #include <any>
 #include <cstdlib>
@@ -33,6 +34,34 @@ void PrintQuery(const Query& query) {
     }
 }
 
+
+void PrintTable(const std::vector<std::vector<std::string>> &table) {
+    if (table.empty()) return;
+    size_t cols = table[0].size();
+    std::vector<size_t> widths(cols, 0);
+    for (const auto &row : table) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            widths[i] = std::max(widths[i], row[i].size());
+        }
+    }
+    auto printSeparator = [&]() {
+        std::cout << '+';
+        for (size_t w : widths) {
+            std::cout << std::string(w + 2, '-') << '+';
+        }
+        std::cout << "\n";
+    };
+
+    printSeparator();
+    for (const auto &row : table) {
+        std::cout << '|';
+        for (size_t i = 0; i < row.size(); ++i) {
+            std::cout << ' ' << std::setw(widths[i]) << std::left << row[i] << ' ' << '|';
+        }
+        std::cout << "\n";
+        printSeparator();
+    }
+}
 int main(int argc, char *argv[]) {
   try {
     Config config(argc, argv);
@@ -52,21 +81,21 @@ int main(int argc, char *argv[]) {
       std::cerr << "Не удалось открыть репозиторий\n";
       return EXIT_FAILURE;
     }
-    auto vec = *GetAllCommitsInfo(repo, "lab7");
+    std::vector<std::unique_ptr<CommitInfo>> vec;
+    try {
+      vec = GetAllCommitsInfo(repo, "lab7");
+    } catch (std::exception &e) {
+      std::cout << e.what() << std::endl;
+    }
     
     QueryHandler qh(repo, vec);
     auto res = qh.Execute(query);
-    std::cout << res.size() << std::endl;
-    for (auto &fields : res) {
-      for (auto &s : fields) {
-        std::cout << s << ' ';
-      }
-      std::cout << std::endl;
-    }
+    PrintTable(res);
+    
     git_repository_free(repo);
     git_libgit2_shutdown();
 
-    // execute query
+    
   } catch (std::invalid_argument err) {
     std::cerr << err.what() << std::endl;
     return EXIT_FAILURE;

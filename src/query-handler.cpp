@@ -27,7 +27,7 @@ QueryHandler::QueryHandler(git_repository *repo,
     commits_.push_back(ci);
     btree_author_name_[ci->author_name].push_back(ci);
     btree_author_email_[ci->author_email].push_back(ci);
-    btree_date_.insert({ci->date, ci});
+    btree_date_[ci->date].push_back(ci);
   }
 }
 
@@ -36,9 +36,7 @@ QueryHandler::Execute(const Query &query) {
   std::vector<std::vector<std::string>> res;
   if (query.From() == COMMITS) {
     filterCommitsByBTree(query);
-    std::cout << commits_.size() << std::endl;
     filterCommitsByTextSearch(query);
-    std::cout << commits_.size() << std::endl;
     for (auto it = commits_.begin(); it != commits_.end(); ++it) {
       std::vector<std::string> fields;
       if (query.Select() & constants::Hash) {
@@ -68,9 +66,9 @@ QueryHandler::Execute(const Query &query) {
 void QueryHandler::filterCommitsByBTree(const Query &query) {
   std::unordered_set<CommitInfo *> s, sn;
   bool first_commit = true;
-  auto Apply = [&](const auto &btree, const auto value) {
-    auto low = btree.lower_bound(value);
-    auto high = btree.upper_bound(value);
+  auto Apply = [&](const auto &btree, const auto left, const auto right) {
+    auto low = btree.lower_bound(left);
+    auto high = btree.upper_bound(right);
     for (auto it = low; it != high; ++it) {
       auto commits = it->second;
       for (const auto &commit : commits) {
@@ -84,11 +82,12 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     sn.clear();
     auto key = clause.Key, value = clause.Value;
     if (key == "author_name") {
-      Apply(btree_author_name_, value);
+      Apply(btree_author_name_, value, value);
     } else if (key == "author_email") {
-      Apply(btree_author_email_, value);
-      // } else if (key == "date") {
-      //   Apply(btree_date_, value);
+      Apply(btree_author_email_, value, value);
+    } else if (key == "date") {
+      Apply(btree_date_, std::chrono::seconds(clause.FromTimeSeconds()),
+            std::chrono::seconds(clause.ToTimeSeconds()));
     } else {
       continue;
     }

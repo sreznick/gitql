@@ -81,12 +81,6 @@ GetAllCommitsInfo(git_repository *repo, const std::string &branch) {
     auto author = git_commit_author(commit);
     auto message = git_commit_message(commit);
     auto time = git_commit_time(commit);
-    // auto files = GetCommitFiles(commit, repo);
-    // if (!files) {
-    //   git_commit_free(commit);
-    //   git_revwalk_free(walker);
-    //   return std::nullopt;
-    // }
     commits.emplace_back(
         std::make_unique<CommitInfo>(hash, author, message, time, std::vector<std::string>()));
     git_commit_free(commit);

@@ -22,8 +22,8 @@ enum WhereClauseType {
 
 struct WhereClause {
     enum WhereClauseType Type;
-    mutable std::tm FromTime;
-    mutable std::tm ToTime;
+    mutable std::tm FromTime {};
+    mutable std::tm ToTime {};
     std::string Key;
     std::string Value;
     uint64_t FromTimeSeconds() const {
