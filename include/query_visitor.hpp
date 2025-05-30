@@ -10,12 +10,12 @@
 
 class QueryVisitor : public gitql::TParserBaseVisitor {
 public:
-    std::any visitEqual(gitql::TParser::EqualContext* ctx) override;
-    std::any visitRange(gitql::TParser::RangeContext* ctx) override;
-    std::any visitContains(gitql::TParser::ContainsContext* ctx) override;
-    std::any visitFields(gitql::TParser::FieldsContext* ctx) override;
-    std::any visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) override;
-    std::any visitOffsetFirst(gitql::TParser::OffsetFirstContext* ctx) override;
+    antlrcpp::Any visitEqual(gitql::TParser::EqualContext* ctx) override;
+    antlrcpp::Any visitRange(gitql::TParser::RangeContext* ctx) override;
+    antlrcpp::Any visitContains(gitql::TParser::ContainsContext* ctx) override;
+    antlrcpp::Any visitFields(gitql::TParser::FieldsContext* ctx) override;
+    antlrcpp::Any visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) override;
+    antlrcpp::Any visitOffsetFirst(gitql::TParser::OffsetFirstContext* ctx) override;
     const std::vector<WhereClause>& Where() const;
     uint64_t Select() const;
     std::size_t Limit() const;
