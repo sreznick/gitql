@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 Config::Config(int argc, char* argv[]) {
-    for (size_t i = 1; i < argc; i++) {
+    for (size_t i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-query") == 0) {
             if (i + 1 == argc) {
                 throw std::invalid_argument("query flag does not have any value");

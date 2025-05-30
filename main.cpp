@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     // PrintQuery(query);
     git_libgit2_init();
     git_repository *repo = nullptr;
-    if (git_repository_open(&repo, "/home/sh4rrkyyyy/os/xxxx") != 0) {
+    if (git_repository_open(&repo, argv[1]) != 0) {
       std::cerr << "Incorrect path" << std::endl;
       return EXIT_FAILURE;
     }

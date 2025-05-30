@@ -7,6 +7,9 @@ RUN apt-get update && \
       build-essential g++ pkg-config unzip \
       openjdk-17-jre-headless \
       libantlr4-runtime-dev \
+      libgit2-dev \
+      libabsl-dev \
+      libxapian-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/task-install

@@ -73,7 +73,7 @@ void QueryHandler::filterCommitsByBTree(const Query &query) {
     for (auto it = low; it != high; ++it) {
       auto commits = it->second;
       for (const auto &commit : commits) {
-        if (first_commit || s.contains(commit)) {
+        if (first_commit || s.count(commit)) {
           sn.insert(commit);
         }
       }
@@ -160,7 +160,7 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     Xapian::MSet mset = enq.get_mset(0, db_.get_doccount());
     std::unordered_set<std::string> files;
     for (auto it = mset.begin(); it != mset.end(); ++it) {
-      if (first_clause || s.contains(it.get_document().get_data())) {
+      if (first_clause || s.count(it.get_document().get_data())) {
         sn.insert(it.get_document().get_data());
       }
     }
