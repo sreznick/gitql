@@ -123,7 +123,6 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     git_commit *c = GetCommitFromHash(commit->hash, repo_);
     auto files = GetCommitFiles(c, repo_);
     git_commit_free(c);
-    // todo: handle error
     commit->files = files;
     for (const auto &file : commit->files) {
       file_to_commits_[file].push_back(commit);
@@ -154,7 +153,6 @@ void QueryHandler::filterCommitsByTextSearch(const Query &query) {
     if (clause.Type != WHERE_CLAUSE_TYPE_CONTAINS) {
       continue;
     }
-    // todo: add to enum difference between contains in file or in message ?
     Xapian::Query q =
         qp_.parse_query(clause.Value, Xapian::QueryParser::FLAG_PHRASE);
     Xapian::Enquire enq(db_);
