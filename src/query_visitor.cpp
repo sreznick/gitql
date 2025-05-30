@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 
-std::any QueryVisitor::visitContains(gitql::TParser::ContainsContext* ctx) {
+antlrcpp::Any QueryVisitor::visitContains(gitql::TParser::ContainsContext* ctx) {
     std::string field = ctx->FIELD()->getText();
     std::string text = ctx->QUOTE()->getText();
 
@@ -15,7 +15,7 @@ std::any QueryVisitor::visitContains(gitql::TParser::ContainsContext* ctx) {
     return nullptr;
 }
 
-std::any QueryVisitor::visitRange(gitql::TParser::RangeContext* ctx) {
+antlrcpp::Any QueryVisitor::visitRange(gitql::TParser::RangeContext* ctx) {
     std::string field = ctx->FIELD()->getText();
     std::string from = ctx->QUOTE().at(0)->getText();
     from = from.substr(1, from.size() - 2);
@@ -43,7 +43,7 @@ std::any QueryVisitor::visitRange(gitql::TParser::RangeContext* ctx) {
     return nullptr;
 }
 
-std::any QueryVisitor::visitEqual(gitql::TParser::EqualContext* ctx) {
+antlrcpp::Any QueryVisitor::visitEqual(gitql::TParser::EqualContext* ctx) {
     std::string key = ctx->FIELD()->getText();
     std::string value = ctx->QUOTE()->getText();
     value = value.substr(1, value.size() - 2);
@@ -99,7 +99,7 @@ const std::vector<WhereClause>& QueryVisitor::Where() const {
     return where_;
 }
 
-std::any QueryVisitor::visitFields(gitql::TParser::FieldsContext* ctx) {
+antlrcpp::Any QueryVisitor::visitFields(gitql::TParser::FieldsContext* ctx) {
     if (ctx->ALL()) {
         select_ = ~0ull;
     } else {
@@ -129,7 +129,7 @@ uint64_t QueryVisitor::Select() const {
     return select_;
 }
 
-std::any QueryVisitor::visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) {
+antlrcpp::Any QueryVisitor::visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) {
     limit_ = std::stoul(ctx->NUM().at(0)->getText());
     if (ctx->OFFSET()) {
         offset_ = std::stoul(ctx->NUM().at(1)->getText());
@@ -139,7 +139,7 @@ std::any QueryVisitor::visitLimitFirst(gitql::TParser::LimitFirstContext* ctx) {
     return nullptr;
 }
 
-std::any QueryVisitor::visitOffsetFirst(gitql::TParser::OffsetFirstContext* ctx) {
+antlrcpp::Any QueryVisitor::visitOffsetFirst(gitql::TParser::OffsetFirstContext* ctx) {
     offset_ = std::stoul(ctx->NUM().at(0)->getText());
     if (ctx->LIMIT()) {
         limit_ = std::stoul(ctx->NUM().at(1)->getText());

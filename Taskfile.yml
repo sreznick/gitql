@@ -1,0 +1,15 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  build:
+    vars:
+      ANTLR_GENERATED: antlr4cpp_generated
+      # ANTLR_LIB: /opt/homebrew/Cellar/antlr4-cpp-runtime/4.13.2/lib
+      # ANTLR_RUNTIME: /opt/homebrew/Cellar/antlr4-cpp-runtime/4.13.2/include/antlr4-runtime
+    cmds:
+      - mkdir -p {{.ANTLR_GENERATED}} bin
+      - rm -rf ./{{.ANTLR_GENERATED}}/* ./bin/*
+      - antlr -Dlanguage=Cpp -package gitql -visitor -listener -o ./{{.ANTLR_GENERATED}} TParser.g4 TLexer.g4
+      - g++ -std=c++17 -I{{.ANTLR_GENERATED}} -Iinclude -I{{.ANTLR_RUNTIME}} ./src/*.cpp main.cpp ./{{.ANTLR_GENERATED}}/*.cpp -L{{.ANTLR_LIB}} -lantlr4-runtime -o bin/gitql
